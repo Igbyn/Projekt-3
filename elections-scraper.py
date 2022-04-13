@@ -26,6 +26,11 @@ def get_links() -> list:
             rows.append(get_info(f"https://volby.cz/pls/ps2017nss/{td.find('a')['href']}"))
     return rows
 
+def get_strany(n, soupo) -> bool:
+    if soupo.find("div", {"class": "t2_470"}).find_next("div", {"class": "t2_470"}).find_all("tr")[-n].find("td").text == "-":
+        return True
+    return False
+
 def get_info(LINK) -> list:
     ro = requests.get(LINK)
     soupo = BeautifulSoup(ro.text, "html.parser")
@@ -39,7 +44,10 @@ def get_info(LINK) -> list:
     volici = soupo.find("td", {"headers":"sa2"}).text
     obalky = soupo.find("td", {"headers":"sa3"}).text
     hlasy = soupo.find("td", {"headers":"sa6"}).text
-    strany = soupo.find("div", {"class":"t2_470"}).find_next("div", {"class":"t2_470"}).find_all("tr")[-1].find("td").text
+    n = 1
+    while get_strany(n, soupo):
+        n += 1
+    strany = soupo.find("div", {"class": "t2_470"}).find_next("div", {"class": "t2_470"}).find_all("tr")[-n].find("td").text
     return [kod, obec, volici, obalky, hlasy, strany]
 
 def vytvoreni_souboru():
